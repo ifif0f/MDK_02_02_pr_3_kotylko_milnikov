@@ -10,7 +10,7 @@ namespace Common
     {
         /// <summary> Змея персонажа
         public Snakes SnakesPlayers = new Snakes();
-        /// <summary> Точка на карте
+        /// <summary> Точка на карте (яблоко)
         public Snakes.Point Points = new Snakes.Point();
         /// <summary> Место игрока
         public int Top = 0;

@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Snake
@@ -134,6 +135,116 @@ namespace Snake
             viewModelGamesPlayer.Points = new Snakes.Point(new Random().Next(10, 783), new Random().Next(10, 410));
             viewModelGames.Add(viewModelGamesPlayer);
             return viewModelGames.FindIndex(x => x == viewModelGamesPlayer);
+        }
+
+        /// <summary>
+        /// Таймер с игрой (тут происходит перемещение змеи и обработка столкновений
+        /// </summary>
+        public static void Timer()
+        {
+            while (true)
+            {
+                Thread.Sleep(100);
+
+                List<ViewModelGames> RemoteSnakes = viewModelGames.FindAll(x => x.SnakesPlayers.GameOver);
+                if(RemoteSnakes.Count > 0)
+                {
+                    foreach (ViewModelGames DeadSnake in RemoteSnakes)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"Отключит пользователя: {remoteIPAddress.Find(x => x.IdSnake == DeadSnake.IdSnake).IPAddress}" +
+                            $":{remoteIPAddress.Find(x => x.IdSnake == DeadSnake.IdSnake).Port}");
+                        remoteIPAddress.RemoveAll(x => x.IdSnake == DeadSnake.IdSnake);
+                    }
+                    viewModelGames.RemoveAll(x => x.SnakesPlayers.GameOver);
+                }
+
+                foreach (ViewModelUserSettings User in remoteIPAddress)
+                {
+                    Snakes Snake = viewModelGames.Find(x => x.IdSnake == User.IdSnake).SnakesPlayers;
+                    for (int i = Snake.Points.Count - 1; i >= 0; i--)
+                    {
+                        if(i != 0)
+                        {
+                            Snake.Points[i] = Snake.Points[i - 1];
+                        }
+                        else
+                        {
+                            int Speed = 10 + (int)Math.Round(Snake.Points.Count / 20f);
+                            if (Speed > MaxSpeed) Speed = MaxSpeed;
+
+                            if(Snake.direction == Snakes.Direction.Right)
+                                Snake.Points[i] = new Snakes.Point() { X = Snake.Points[i].X + Speed, Y = Snake.Points[i].Y };
+                            else if (Snake.direction == Snakes.Direction.Down)
+                                Snake.Points[i] = new Snakes.Point() { X = Snake.Points[i].X, Y = Snake.Points[i].Y + Speed };
+                            else if (Snake.direction == Snakes.Direction.Up)
+                                Snake.Points[i] = new Snakes.Point() { X = Snake.Points[i].X, Y = Snake.Points[i].Y - Speed };
+                            else if (Snake.direction == Snakes.Direction.Left)
+                                Snake.Points[i] = new Snakes.Point() { X = Snake.Points[i].X - Speed, Y = Snake.Points[i].Y };
+                        }
+                    }
+
+                    if (Snake.Points[0].X <= 0 || Snake.Points[0].X >= 793)
+                        Snake.GameOver = true;
+                    else if (Snake.Points[0].Y <= 0 || Snake.Points[0].Y >= 420)
+                        Snake.GameOver = true;
+
+                    if(Snake.direction  != Snakes.Direction.Start)
+                    {
+                        for (int i = 1; i < Snake.Points.Count; i++)
+                        {
+                            if (Snake.Points[0].X >= Snake.Points[i].X - 1 && Snake.Points[0].X <= Snake.Points[i].X + 1)
+                            {
+                                if (Snake.Points[0].Y >= Snake.Points[i].Y - 1 && Snake.Points[0].Y <= Snake.Points[i].Y + 1)
+                                {
+                                    Snake.GameOver = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (Snake.Points[0].X >= viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points.X - 15 &&
+                        Snake.Points[0].X >= viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points.X + 15)
+                    {
+                        if (Snake.Points[0].Y >= viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points.Y - 15 &&
+                            Snake.Points[0].Y >= viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points.Y + 15)
+                        {
+                            viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points = new Snakes.Point(
+                                new Random().Next(10, 783),
+                                new Random().Next(10, 410));
+
+                            Snake.Points.Add(new Snakes.Point()
+                            {
+                                X = Snake.Points[Snake.Points.Count - 1].X,
+                                Y = Snake.Points[Snake.Points.Count - 1].Y
+                            });
+                            LoadLeaders();
+
+                            Leaders.Add(new Leaders()
+                            {
+                                Name = User.Name,
+                                Points = Snake.Points.Count - 3
+                            });
+                            Leaders = Leaders.OrderByDescending(x => x.Points).ThenBy(x => x.Name).ToList();
+                            viewModelGames.Find(x => x.IdSnake == User.IdSnake).Top =
+                                Leaders.FindIndex(x => x.Points == Snake.Points.Count - 3 && x.Name == User.Name) + 1;
+                        }
+                    }
+
+                    if (Snake.GameOver)
+                    {
+                        LoadLeaders();
+                        Leaders.Add(new Leaders()
+                        {
+                            Name = User.Name,
+                            Points = Snake.Points.Count - 3
+                        });
+                        SaveLeaders();
+                    }
+                }
+                Send();
+            }
         }
     }
 }
