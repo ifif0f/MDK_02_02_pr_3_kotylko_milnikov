@@ -220,10 +220,10 @@ namespace Snake
                     }
 
                     if (Snake.Points[0].X >= viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points.X - 15 &&
-                        Snake.Points[0].X >= viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points.X + 15)
+                        Snake.Points[0].X <= viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points.X + 15)
                     {
                         if (Snake.Points[0].Y >= viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points.Y - 15 &&
-                            Snake.Points[0].Y >= viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points.Y + 15)
+                            Snake.Points[0].Y <= viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points.Y + 15)
                         {
                             viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points = new Snakes.Point(
                                 new Random().Next(10, 783),
