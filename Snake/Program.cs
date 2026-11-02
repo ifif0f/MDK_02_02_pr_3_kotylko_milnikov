@@ -2,6 +2,8 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -245,6 +247,35 @@ namespace Snake
                 }
                 Send();
             }
+        }
+
+        /// <summary>
+        /// Сохранение результата
+        /// </summary>
+        public static void SaveLeaders()
+        {
+            string json = JsonConvert.SerializeObject(Leaders);
+            StreamWriter sw = new StreamWriter("./leaders.txt");
+            sw.WriteLine(json);
+            sw.Close();
+        }
+
+        /// <summary>
+        /// Загрузка результата
+        /// </summary>
+        public static void LoadLeaders()
+        {
+            if (File.Exists("./leaders.txt"))
+            {
+                StreamReader sr = new StreamReader("./leaders.txt");
+                string json = sr.ReadLine();
+                sr.Close();
+                if(!string.IsNullOrEmpty(json))
+                    Leaders = JsonConvert.DeserializeObject<List<Leaders>>(json);
+                else 
+                    Leaders = new List<Leaders>(); 
+            }
+            else Leaders = new List<Leaders>();
         }
     }
 }
