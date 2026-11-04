@@ -32,8 +32,14 @@ namespace SnakeWPF.Pages
         {
             if (MainWindow.mainWindow.receivingUdpClient != null)
                 MainWindow.mainWindow.receivingUdpClient.Close();
+
             if (MainWindow.mainWindow.tRec != null)
-                MainWindow.mainWindow.tRec.Abort();
+            {
+                MainWindow.mainWindow.cts.Cancel(); 
+                MainWindow.mainWindow.tRec = null;  
+            }
+            MainWindow.mainWindow.cts = new CancellationTokenSource();
+
             IPAddress UserIPAddress;
             if (!IPAddress.TryParse(ip.Text, out UserIPAddress))
             {

@@ -27,7 +27,13 @@ namespace SnakeWPF.Pages
             top.Content = MainWindow.mainWindow.ViewModelGames.Top;
             glasses.Content = $"{MainWindow.mainWindow.ViewModelGames.SnakesPlayers.Points.Count - 3} glasses";
             MainWindow.mainWindow.receivingUdpClient.Close();
-            MainWindow.mainWindow.tRec.Abort();
+
+            if (MainWindow.mainWindow.tRec != null)
+            {
+                MainWindow.mainWindow.cts.Cancel();
+                MainWindow.mainWindow.tRec = null;
+            }
+
             MainWindow.mainWindow.ViewModelGames = null;
         }
 
