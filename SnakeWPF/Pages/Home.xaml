@@ -10,13 +10,13 @@
 
     <Grid>
         <Grid.Background>
-            <ImageBrush ImageSource="/SnakeWPF;component/Image/background.jpg"/>
+            <ImageBrush ImageSource="/SnakeWPF;component/Images/background.jpg"/>
         </Grid.Background>
 
         <Grid>
             <Grid Width="320" Height="200" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Grid.Background>
-                    <ImageBrush ImageSource="/SnakeWPF;component/Image/background_2.png"/>
+                    <ImageBrush ImageSource="/Images/9.jpg" />
                 </Grid.Background>
 
                 <Label Content="Your IP address:"

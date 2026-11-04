@@ -10,7 +10,7 @@
 
     <Grid>
         <Grid.Background>
-            <ImageBrush ImageSource="/SnakeWPF;component/Image/background_3.jpg" Stretch="UniformToFill"/>
+            <ImageBrush ImageSource="/Images/background_3.png" Stretch="UniformToFill"/>
         </Grid.Background>
         <Canvas x:Name="canvas">
         </Canvas>

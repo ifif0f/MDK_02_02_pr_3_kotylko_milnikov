@@ -10,7 +10,7 @@
 
     <Grid>
         <Grid.Background>
-            <ImageBrush ImageSource="/SnakeWPF;component/Image/background.jpg"/>
+            <ImageBrush ImageSource="/SnakeWPF;component/Images/background.jpg"/>
         </Grid.Background>
         <Grid>
             <Grid Width="320" 
@@ -18,12 +18,12 @@
                   HorizontalAlignment="Center" 
                   VerticalAlignment="Center">
                 <Grid.Background>
-                    <ImageBrush ImageSource="/SnakeWPF;component/Image/background_2.png"/>
+                    <ImageBrush ImageSource="/Images/596f3168882f1e6848878f09786742c3.jpg"/>
                 </Grid.Background>
 
                 <Label x:Name="name"
                        Content="Alexashchka"
-                       Margin="45,18,45,0"
+                       Margin="45,28,45,0"
                        VerticalAlignment="Top"
                        HorizontalContentAlignment="Center"
                        FontFamily="Forte"
@@ -31,7 +31,7 @@
 
                 <Label x:Name="glasses"
                        Content="90 glasses"
-                       Margin="45,50,45,0"
+                       Margin="45,55,45,0"
                        VerticalAlignment="Top"
                        HorizontalContentAlignment="Center"
                        FontFamily="Forte"/>
