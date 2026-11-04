@@ -118,5 +118,22 @@ namespace SnakeWPF
                 sender.Close();
             }
         }
+
+        private void EventKeyUp(object sender, KeyEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(ViewModelUserSettings.IPAddress) &&
+                !string.IsNullOrEmpty(ViewModelUserSettings.Port) &&
+                (ViewModelGames != null && !ViewModelGames.SnakesPlayers.GameOver))
+            { 
+                if (e.Key == Key.Up)
+                    Send($"Up|{JsonConvert.SerializeObject(ViewModelUserSettings)}");
+                else if (e.Key == Key.Down)
+                    Send($"Down|{JsonConvert.SerializeObject(ViewModelUserSettings)}");
+                else if (e.Key == Key.Left)
+                    Send($"Left|{JsonConvert.SerializeObject(ViewModelUserSettings)}");
+                else if (e.Key == Key.Right)
+                    Send($"Right|{JsonConvert.SerializeObject(ViewModelUserSettings)}");
+            }
+        }
     }
 }
