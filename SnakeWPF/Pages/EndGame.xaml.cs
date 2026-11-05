@@ -33,8 +33,8 @@ namespace SnakeWPF.Pages
                 MainWindow.mainWindow.cts.Cancel();
                 MainWindow.mainWindow.tRec = null;
             }
-
             MainWindow.mainWindow.ViewModelGames = null;
+            MainWindow.mainWindow.isGameOpened = false;
         }
 
         private void OpenHome(object sender, RoutedEventArgs e)

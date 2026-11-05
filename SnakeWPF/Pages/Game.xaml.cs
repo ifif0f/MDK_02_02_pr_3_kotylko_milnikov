@@ -27,84 +27,105 @@ namespace SnakeWPF.Pages
             InitializeComponent();
         }
 
-        public void CreateUI()
+        public void CreateUI(List<ViewModelGames> AllSnakes)
         {
+            //if (AllSnakes == null) return;
+
             Dispatcher.Invoke(() =>
             {
                 if (StepCadr == 0) StepCadr = 1;
                 else StepCadr = 0;
                 canvas.Children.Clear();
-                for (int iPoint = MainWindow.mainWindow.ViewModelGames.SnakesPlayers.Points.Count - 1; iPoint >= 0; iPoint--)
+
+                foreach(var snake in AllSnakes)
                 {
-                    Snakes.Point SnakePoint = MainWindow.mainWindow.ViewModelGames.SnakesPlayers.Points[iPoint];
-
-                    if (iPoint != 0)
+                    for (int iPoint = snake.SnakesPlayers.Points.Count - 1; iPoint >= 0; iPoint--)
                     {
-                        Snakes.Point NextSnakePoint = MainWindow.mainWindow.ViewModelGames.SnakesPlayers.Points[iPoint - 1];
+                        Snakes.Point SnakePoint = snake.SnakesPlayers.Points[iPoint];
 
-                        if (SnakePoint.X > NextSnakePoint.X || SnakePoint.X < NextSnakePoint.X)
+                        if (iPoint != 0)
                         {
-                            if (iPoint % 2 == 0)
+                            Snakes.Point NextSnakePoint = snake.SnakesPlayers.Points[iPoint - 1];
+
+                            if (SnakePoint.X > NextSnakePoint.X || SnakePoint.X < NextSnakePoint.X)
                             {
-                                if (StepCadr % 2 == 0)
-                                    SnakePoint.Y -= 1;
+                                if (iPoint % 2 == 0)
+                                {
+                                    if (StepCadr % 2 == 0)
+                                        SnakePoint.Y -= 1;
+                                    else
+                                        SnakePoint.Y += 1;
+                                }
                                 else
-                                    SnakePoint.Y += 1;
+                                {
+                                    if (StepCadr % 2 == 0)
+                                        SnakePoint.Y += 1;
+                                    else
+                                        SnakePoint.Y -= 1;
+                                }
                             }
-                            else
+                            else if (SnakePoint.Y > NextSnakePoint.Y || SnakePoint.Y < NextSnakePoint.Y)
                             {
-                                if (StepCadr % 2 == 0)
-                                    SnakePoint.Y += 1;
+                                if (iPoint % 2 == 0)
+                                {
+                                    if (StepCadr % 2 == 0)
+                                        SnakePoint.X -= 1;
+                                    else
+                                        SnakePoint.X += 1;
+                                }
                                 else
-                                    SnakePoint.Y -= 1;
+                                {
+                                    if (StepCadr % 2 == 0)
+                                        SnakePoint.X += 1;
+                                    else
+                                        SnakePoint.X -= 1;
+                                }
                             }
                         }
-                        else if (SnakePoint.Y > NextSnakePoint.Y || SnakePoint.Y < NextSnakePoint.Y)
+                        Brush Color;
+                        if(snake.IdSnake == MainWindow.mainWindow.ViewModelUserSettings.IdSnake)
                         {
-                            if (iPoint % 2 == 0)
-                            {
-                                if (StepCadr % 2 == 0)
-                                    SnakePoint.X -= 1;
-                                else
-                                    SnakePoint.X += 1;
-                            }
+                            if (iPoint == 0)
+                                Color = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 127, 14));
                             else
-                            {
-                                if (StepCadr % 2 == 0)
-                                    SnakePoint.X += 1;
-                                else
-                                    SnakePoint.X -= 1;
-                            }
+                                Color = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 198, 19));
                         }
-                    }
-                    Brush Color;
-                    if (iPoint == 0)
-                        Color = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 127, 14));
-                    else
-                        Color = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 198, 19));
+                        else
+                        {
+                            if (iPoint == 0)
+                                Color = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 0, 150));
+                            else
+                                Color = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 50, 50, 255));
+                        }
 
-                    Ellipse ellipse = new Ellipse()
-                    {
-                        Width = 20,
-                        Height = 20,
-                        Margin = new Thickness(SnakePoint.X - 10, SnakePoint.Y - 10, 0, 0),
-                        Fill = Color,
-                        Stroke = Brushes.Black
-                    };
-                    canvas.Children.Add(ellipse);
+                        Ellipse ellipse = new Ellipse()
+                        {
+                            Width = 20,
+                            Height = 20,
+                            Margin = new Thickness(SnakePoint.X - 10, SnakePoint.Y - 10, 0, 0),
+                            Fill = Color,
+                            Stroke = Brushes.Black
+                        };
+                        canvas.Children.Add(ellipse);
+                    }                    
                 }
-                ImageBrush myBrush = new ImageBrush();
-                myBrush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/apple.png"));
-                Ellipse points = new Ellipse()
+                
+                var mySnake = AllSnakes.FirstOrDefault(x => x.IdSnake == MainWindow.mainWindow.ViewModelUserSettings.IdSnake);
+                if (mySnake != null)
                 {
-                    Width = 40,
-                    Height = 40,
-                    Margin = new Thickness(
-                        MainWindow.mainWindow.ViewModelGames.Points.X - 20,
-                        MainWindow.mainWindow.ViewModelGames.Points.Y - 20, 0, 0),
-                    Fill = myBrush
-                };
-                canvas.Children.Add(points);
+                    ImageBrush myBrush = new ImageBrush();
+                    myBrush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/apple.png"));
+                    Ellipse points = new Ellipse()
+                    {
+                        Width = 40,
+                        Height = 40,
+                        Margin = new Thickness(
+                            mySnake.Points.X - 20,
+                            mySnake.Points.Y - 20, 0, 0),
+                        Fill = myBrush
+                    };
+                    canvas.Children.Add(points);
+                }
             });
         }
     }

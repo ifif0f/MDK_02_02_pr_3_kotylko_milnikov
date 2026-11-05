@@ -53,7 +53,8 @@ namespace Snake
 
                 try
                 {
-                    byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(viewModelGames.Find(x => x.IdSnake == User.IdSnake)));
+                    //byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(viewModelGames.Find(x => x.IdSnake == User.IdSnake)));
+                    byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(viewModelGames));
                     sender.Send(bytes, bytes.Length, endPoint);
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine($"Отправил данные пользователю: {User.IPAddress}:{User.Port}");
@@ -98,6 +99,12 @@ namespace Snake
                         remoteIPAddress.Add(viewModelUserSettings);
                         viewModelUserSettings.IdSnake = AddSnake();
                         viewModelGames[viewModelUserSettings.IdSnake].IdSnake = viewModelUserSettings.IdSnake;
+
+                        UdpClient sender = new UdpClient();
+                        IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(viewModelUserSettings.IPAddress), int.Parse(viewModelUserSettings.Port));
+                        byte[] bytes = Encoding.UTF8.GetBytes($"MyIdSnake|{viewModelUserSettings.IdSnake}");
+                        sender.Send(bytes, bytes.Length, endPoint);
+                        sender.Close();
                     }
                     else
                     {
@@ -107,18 +114,32 @@ namespace Snake
                         x.Port == viewModelUserSettings.Port);
                         if (IdPlayer != -1)
                         {
-                            if (dataMessage[0] == "Up" &&
-                                viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Down)
-                                viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Up;
-                            else if (dataMessage[0] == "Down" &&
-                                viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Up)
-                                viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Down;
-                            else if (dataMessage[0] == "Left" &&
-                                viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Right)
-                                viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Left;
-                            else if (dataMessage[0] == "Right" &&
-                                viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Left)
-                                viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Right;
+
+                            var game = viewModelGames.Find(x => x.IdSnake == remoteIPAddress[IdPlayer].IdSnake);
+                            if (game != null)
+                            {
+                                if (dataMessage[0] == "Up" && game.SnakesPlayers.direction != Snakes.Direction.Down)
+                                    game.SnakesPlayers.direction = Snakes.Direction.Up;
+                                else if (dataMessage[0] == "Down" && game.SnakesPlayers.direction != Snakes.Direction.Up)
+                                    game.SnakesPlayers.direction = Snakes.Direction.Down;
+                                else if (dataMessage[0] == "Left" && game.SnakesPlayers.direction != Snakes.Direction.Right)
+                                    game.SnakesPlayers.direction = Snakes.Direction.Left;
+                                else if (dataMessage[0] == "Right" && game.SnakesPlayers.direction != Snakes.Direction.Left)
+                                    game.SnakesPlayers.direction = Snakes.Direction.Right;
+                            }
+
+                            //if (dataMessage[0] == "Up" &&
+                            //    viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Down)
+                            ////    viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Up;
+                            //else if (dataMessage[0] == "Down" &&
+                            //    viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Up)
+                            //    viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Down;
+                            //else if (dataMessage[0] == "Left" &&
+                            //    viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Right)
+                            //    viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Left;
+                            //else if (dataMessage[0] == "Right" &&
+                            //    viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Left)
+                            //    viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Right;
                         }
                     }
                 }
@@ -176,7 +197,13 @@ namespace Snake
 
                 foreach (ViewModelUserSettings User in remoteIPAddress)
                 {
-                    Snakes Snake = viewModelGames.Find(x => x.IdSnake == User.IdSnake).SnakesPlayers;
+                    //Snakes Snake = viewModelGames.Find(x => x.IdSnake == User.IdSnake).SnakesPlayers;
+                    var game = viewModelGames.Find(x => x.IdSnake == User.IdSnake);
+
+                    if (game == null) continue;
+
+                    Snakes Snake = game.SnakesPlayers;
+
                     for (int i = Snake.Points.Count - 1; i >= 0; i--)
                     {
                         if(i != 0)

@@ -26,13 +26,16 @@ namespace SnakeWPF
         public static MainWindow mainWindow;
         public ViewModelUserSettings ViewModelUserSettings = new ViewModelUserSettings();
         public ViewModelGames ViewModelGames = null;
-        public static IPAddress remoteIPAddress = IPAddress.Parse("10.49.3.229");
+        public static IPAddress remoteIPAddress = IPAddress.Parse("10.49.1.215");
         public static int remotePort = 5001;
         public Thread tRec;
         public UdpClient receivingUdpClient;
         public CancellationTokenSource cts = new CancellationTokenSource();
         public Pages.Home Home = new Pages.Home();
         public Pages.Game Game = new Pages.Game();
+
+        public List<ViewModelGames> AllSnakes = null;
+        public bool isGameOpened = false;
 
         public MainWindow()
         {
@@ -76,24 +79,55 @@ namespace SnakeWPF
                 {
                     byte[] receiveBytes = receivingUdpClient.Receive(ref RemoteIpEndPoint);
                     string returnData = Encoding.UTF8.GetString(receiveBytes);
-                    if (ViewModelGames == null)
+
+                    if(returnData.StartsWith("MyIdSnake|"))
                     {
+                        var data = returnData.Split("|");
+                        ViewModelUserSettings.IdSnake = int.Parse(data[1]);
+                        continue;
+                    }
+
+                    //if (ViewModelGames == null) // !(frame.Content is Pages.Game)
+                    //{
+                    //    Dispatcher.Invoke(() =>
+                    //    {
+                    //        OpenPage(Game);
+                    //    });
+                    //}
+                    if (!isGameOpened)
+                    {
+                        isGameOpened = true;
                         Dispatcher.Invoke(() =>
                         {
                             OpenPage(Game);
                         });
                     }
-                    ViewModelGames = JsonConvert.DeserializeObject<ViewModelGames>(returnData.ToString());
-                    if (ViewModelGames.SnakesPlayers.GameOver)
+
+                    //ViewModelGames = JsonConvert.DeserializeObject<ViewModelGames>(returnData.ToString());
+                    AllSnakes = JsonConvert.DeserializeObject<List<ViewModelGames>>(returnData);
+
+                    //if (ViewModelGames.SnakesPlayers.GameOver)
+                    //{
+                    //    Dispatcher.Invoke(() =>
+                    //    {
+                    //        OpenPage(new Pages.EndGame());
+                    //    });
+                    //}
+
+                    var mySnake = AllSnakes.FirstOrDefault(x => x.IdSnake == ViewModelUserSettings.IdSnake);
+                    if (mySnake != null && mySnake.SnakesPlayers.GameOver)
                     {
+                        ViewModelGames = mySnake;
                         Dispatcher.Invoke(() =>
                         {
                             OpenPage(new Pages.EndGame());
                         });
+                        isGameOpened = false;
                     }
                     else
                     {
-                        Game.CreateUI();
+                        //Game.CreateUI();
+                        Game.CreateUI(AllSnakes);
                     }
                 }
             }
@@ -125,8 +159,7 @@ namespace SnakeWPF
         private void EventKeyUp(object sender, KeyEventArgs e)
         {
             if (!string.IsNullOrEmpty(ViewModelUserSettings.IPAddress) &&
-                !string.IsNullOrEmpty(ViewModelUserSettings.Port) &&
-                (ViewModelGames != null && !ViewModelGames.SnakesPlayers.GameOver))
+                !string.IsNullOrEmpty(ViewModelUserSettings.Port))  //&& (ViewModelGames != null && !ViewModelGames.SnakesPlayers.GameOver)
             { 
                 if (e.Key == Key.Up)
                     Send($"Up|{JsonConvert.SerializeObject(ViewModelUserSettings)}");

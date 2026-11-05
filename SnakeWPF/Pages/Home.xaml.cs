@@ -53,10 +53,10 @@ namespace SnakeWPF.Pages
                 return;
             }
 
-            MainWindow.mainWindow.StartReceiver();
             MainWindow.mainWindow.ViewModelUserSettings.IPAddress = ip.Text;
             MainWindow.mainWindow.ViewModelUserSettings.Port = port.Text;
             MainWindow.mainWindow.ViewModelUserSettings.Name = name.Text;
+            MainWindow.mainWindow.StartReceiver();
             MainWindow.Send("/start|" + JsonConvert.SerializeObject(MainWindow.mainWindow.ViewModelUserSettings));
         }
     }
