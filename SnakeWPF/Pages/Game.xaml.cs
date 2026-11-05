@@ -22,26 +22,42 @@ namespace SnakeWPF.Pages
     public partial class Game : Page
     {
         public int StepCadr = 0;
+        public DateTime _lastUpdateTime = DateTime.Now;
         public Game()
         {
             InitializeComponent();
         }
 
-        public void CreateUI(List<ViewModelGames> AllSnakes)
+        public void CreateUI(List<ViewModelGames> AllSnakes, List<ViewModelGames> PreviousSnakes)
         {
-            //if (AllSnakes == null) return;
-
             Dispatcher.Invoke(() =>
             {
                 if (StepCadr == 0) StepCadr = 1;
                 else StepCadr = 0;
+
+                double progress = (DateTime.Now - _lastUpdateTime).TotalMilliseconds / 100.0;
+                if(progress > 1.0)
+                    progress = 1.0;
+
                 canvas.Children.Clear();
 
                 foreach(var snake in AllSnakes)
                 {
+                    var prevSnake = PreviousSnakes?.FirstOrDefault(x => x.IdSnake == snake.IdSnake);
+
                     for (int iPoint = snake.SnakesPlayers.Points.Count - 1; iPoint >= 0; iPoint--)
                     {
                         Snakes.Point SnakePoint = snake.SnakesPlayers.Points[iPoint];
+
+                        double drawX = SnakePoint.X;
+                        double drawY = SnakePoint.Y;
+
+                        if(prevSnake != null && iPoint < prevSnake.SnakesPlayers.Points.Count)
+                        {
+                            var prevPoint = prevSnake.SnakesPlayers.Points[iPoint];
+                            drawX = prevPoint.X + (SnakePoint.X - prevPoint.X) * progress;
+                            drawY = prevPoint.Y + (SnakePoint.Y - prevPoint.Y) * progress;
+                        }
 
                         if (iPoint != 0)
                         {

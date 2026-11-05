@@ -15,6 +15,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace SnakeWPF
 {
@@ -35,13 +36,26 @@ namespace SnakeWPF
         public Pages.Game Game = new Pages.Game();
 
         public List<ViewModelGames> AllSnakes = null;
+        public List<ViewModelGames> PreviousSnakes = null;
         public bool isGameOpened = false;
+        public DispatcherTimer renderTimer;
 
         public MainWindow()
         {
             InitializeComponent();
             mainWindow = this;
             OpenPage(Home);
+
+            renderTimer = new DispatcherTimer();
+            renderTimer.Interval = TimeSpan.FromMilliseconds(16);
+            renderTimer.Tick += (s, e) =>
+            {
+                if(AllSnakes != null && isGameOpened)
+                {
+                    Game.CreateUI(AllSnakes, PreviousSnakes);
+                }
+            };
+            renderTimer.Start();
         }
 
         public void StartReceiver()
@@ -103,8 +117,15 @@ namespace SnakeWPF
                         });
                     }
 
+                    if (AllSnakes != null)
+                    {
+                        PreviousSnakes = AllSnakes;
+                    }
+
                     //ViewModelGames = JsonConvert.DeserializeObject<ViewModelGames>(returnData.ToString());
                     AllSnakes = JsonConvert.DeserializeObject<List<ViewModelGames>>(returnData);
+
+                    Game._lastUpdateTime = DateTime.Now;
 
                     //if (ViewModelGames.SnakesPlayers.GameOver)
                     //{
@@ -124,11 +145,11 @@ namespace SnakeWPF
                         });
                         isGameOpened = false;
                     }
-                    else
-                    {
-                        //Game.CreateUI();
-                        Game.CreateUI(AllSnakes);
-                    }
+                    //else
+                    //{
+                    //    //Game.CreateUI();
+                    //    Game.CreateUI(AllSnakes);
+                    //}
                 }
             }
             catch (Exception ex)
